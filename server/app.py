@@ -21,14 +21,20 @@ def clear_session():
     return {'message': '200: Successfully cleared session data.'}, 200
 
 @app.route('/articles')
-def index_articles():
+def index_articles():   
+    articles = [article.to_dict() for article in Article.query.all()]
+    return make_response(articles, 200)
 
-    pass
-
-@app.route('/articles/<int:id>')
+@app.route('/articles/<int:id>', methods=['GET'])
 def show_article(id):
-
-    pass
+    article = Article.query.filter_by(id=id).first()
+    if not session['page_views']:
+        session['page_views'] = 0
+    elif session['page_views'] < 4:
+        session['page_views'] += 1
+    else:
+        return make_response({'message': 'Maximum pageview limit reached'}, 401)
+    return make_response(article.to_dict(), 200)
 
 if __name__ == '__main__':
     app.run(port=5555)
